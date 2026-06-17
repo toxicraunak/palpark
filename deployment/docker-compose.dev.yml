@@ -1,0 +1,73 @@
+version: '3.9'
+
+services:
+  mongodb:
+    image: mongo:7.0
+    container_name: mla_dev_mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_dev_data:/data/db
+    networks:
+      - mla_dev_network
+
+  redis:
+    image: redis:7.2-alpine
+    container_name: mla_dev_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    networks:
+      - mla_dev_network
+
+  backend:
+    build:
+      context: ../backend
+      dockerfile: Dockerfile.dev
+    container_name: mla_dev_backend
+    restart: unless-stopped
+    depends_on:
+      - mongodb
+      - redis
+    environment:
+      NODE_ENV: development
+      PORT: 3001
+      MONGODB_URI: mongodb://mongodb:27017/monster_legends_arena
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: dev_jwt_secret_change_in_production
+      JWT_REFRESH_SECRET: dev_refresh_secret_change_in_production
+      CLIENT_URL: http://localhost:3000
+    volumes:
+      - ../backend/src:/app/src
+      - ../backend/logs:/app/logs
+    ports:
+      - "3001:3001"
+    networks:
+      - mla_dev_network
+    command: npm run dev
+
+  frontend:
+    build:
+      context: ../frontend
+      dockerfile: Dockerfile.dev
+    container_name: mla_dev_frontend
+    restart: unless-stopped
+    environment:
+      VITE_API_URL: http://localhost:3001/api
+      VITE_SOCKET_URL: http://localhost:3001
+    volumes:
+      - ../frontend/src:/app/src
+      - ../frontend/public:/app/public
+    ports:
+      - "3000:3000"
+    networks:
+      - mla_dev_network
+    command: npm run dev -- --host
+
+networks:
+  mla_dev_network:
+    driver: bridge
+
+volumes:
+  mongo_dev_data:

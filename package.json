@@ -1,0 +1,33 @@
+{
+  "name": "monster-legends-arena",
+  "version": "1.0.0",
+  "description": "Production-ready MMORPG monster-catching game",
+  "private": true,
+  "workspaces": ["backend", "frontend"],
+  "scripts": {
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:backend": "cd backend && npm run dev",
+    "dev:frontend": "cd frontend && npm run dev",
+    "build": "npm run build:frontend && npm run build:backend",
+    "build:backend": "cd backend && npm run build",
+    "build:frontend": "cd frontend && npm run build",
+    "test": "npm run test:backend && npm run test:frontend",
+    "test:backend": "cd backend && npm test",
+    "test:frontend": "cd frontend && npm test",
+    "seed": "cd backend && npm run seed",
+    "lint": "eslint . --ext .js",
+    "docker:dev": "docker-compose -f deployment/docker-compose.dev.yml up",
+    "docker:prod": "docker-compose -f deployment/docker-compose.prod.yml up -d",
+    "render-install": "npm install --prefix backend && npm install --prefix frontend",
+    "render-build": "npm install --prefix backend && npm install --prefix frontend && npm run build --prefix frontend",
+    "render-start": "node backend/src/server.js"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "eslint": "^8.57.0"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  }
+}

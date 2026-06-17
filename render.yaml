@@ -1,0 +1,69 @@
+# ════════════════════════════════════════════════════════════════════
+#  Render Blueprint — Monster Legends Arena
+#  Single web service: Node/Express API + Socket.IO + built Phaser frontend
+#
+#  Deploy:
+#    1. Push this repo to GitHub
+#    2. On Render: New > Blueprint > connect this repo
+#    3. Render reads this file automatically and creates the service
+#    4. MONGODB_URI is pre-filled below — review/replace JWT secrets after first deploy
+# ════════════════════════════════════════════════════════════════════
+
+services:
+  - type: web
+    name: monster-legends-arena
+    runtime: node
+    plan: free
+    region: oregon
+    branch: main
+    rootDir: .
+
+    buildCommand: npm run render-build && (cd backend && node src/data/seedDatabase.js || echo "Seed skipped (already seeded or DB temporarily unreachable)")
+    startCommand: npm run render-start
+
+    healthCheckPath: /health
+
+    envVars:
+      - key: NODE_ENV
+        value: production
+
+      - key: PORT
+        value: 10000
+
+      # Render auto-injects its own public URL as RENDER_EXTERNAL_URL;
+      # CLIENT_URL is used for CORS — since frontend is served from the
+      # same service, this is mostly a fallback for direct API testing.
+      - key: CLIENT_URL
+        value: "*"
+
+      # ─── MongoDB Atlas ──────────────────────────────────────────────
+      - key: MONGODB_URI
+        value: "mongodb+srv://factotask:Vaibhav0503V@cluster0.wmm2alz.mongodb.net/palpark"
+
+      # ─── Redis (optional — leave unset to run without cache) ───────
+      # - key: REDIS_URL
+      #   value: "redis://default:password@your-redis-host:6379"
+
+      # ─── JWT secrets — Render can auto-generate these ───────────────
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_REFRESH_SECRET
+        generateValue: true
+      - key: JWT_EXPIRE
+        value: 7d
+      - key: JWT_REFRESH_EXPIRE
+        value: 30d
+
+      # ─── Admin / rate limits / game config ──────────────────────────
+      - key: ADMIN_SECRET_KEY
+        generateValue: true
+      - key: RATE_LIMIT_WINDOW_MS
+        value: 900000
+      - key: RATE_LIMIT_MAX
+        value: 200
+      - key: MAX_TEAM_SIZE
+        value: 6
+      - key: LOG_LEVEL
+        value: info
+      - key: ENABLE_FILE_LOGS
+        value: "false"
